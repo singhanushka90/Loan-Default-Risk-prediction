@@ -6,6 +6,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
+from config.features import TARGET_COLUMN
 
 log_dir='logs'
 os.makedirs(log_dir,exist_ok=True)
@@ -29,8 +30,8 @@ if not logger.handlers:
     logger.addHandler(file_handler)
 
 
-def load_train_test_data(train_data:str,test_data:str):
-    """Load train and test data"""
+def load_selected_data(train_data:str,test_data:str):
+    """Load selected data"""
     try:
         train=pd.read_csv(train_data)
         test=pd.read_csv(test_data)
@@ -61,16 +62,17 @@ def clean_data(df):
 
 def split_features_target(df):
     try:
-        X=df.drop('TARGET',axis=1)
-        y=df['TARGET']
+        X=df.drop(TARGET_COLUMN,axis=1)
+        y=df[TARGET_COLUMN]
         logger.debug("Successfully split")
         return X,y
     except Exception as e:
         logger.error('Error during spliting the data: %s',e)
+        raise
 
 
 
-def create_preprocesssor(X_train):
+def create_preprocessor(X_train):
     try:
         categorical=X_train.select_dtypes(include=['object']).columns
         numerical=X_train.select_dtypes(exclude=['object']).columns
@@ -87,41 +89,26 @@ def create_preprocesssor(X_train):
         logger.error('Column not found: %s',e)
         raise
     except Exception as e:
+        
         logger.error("Error during preprocessor: %s",e)
+        raise
 
-
-def preprocessor_data(X_train,X_test,preprocessor):
+def preprocess_data(X_train,X_test,preprocessor):
     try:
         X_train_processed=preprocessor.fit_transform(X_train)
         X_test_processed=preprocessor.transform(X_test)
-        logger.debug("Preprocessing completed successfullly")
-        return X_train_processed,X_test_processed,preprocessor
+        logger.info("Data Preprocessing completed successfullly")
+        return X_train_processed,X_test_processed
     except Exception as e:
         logger.exception("Error during Preprocessing: %s",e)
         raise
 
-
-def save_processed_data(X_train_processed,X_test_processed,y_train,y_test,data_path:str):
-    try:
-        processed_data=os.path.join(data_path,"processed")
-        os.makedirs(processed_data,exist_ok=True)
-        X_train_processed=pd.DataFrame(X_train_processed)
-        X_test_processed=pd.DataFrame(X_test_processed)
-        X_train_processed["TARGET"]=y_train.reset_index(drop=True)
-        X_test_processed["TARGET"]=y_test.reset_index(drop=True)
-        X_train_processed.to_csv(os.path.join(processed_data,"processed_train.csv"),index=False)
-        X_test_processed.to_csv(os.path.join(processed_data,"processed_test.csv"),index=False)
-        logger.info("Processed data saved successfully")
-
-    except Exception as e:
-        logger.exception("Error wile saving processed data")
-        raise
     
 
 
 def main():
     try:
-        train_df,test_df=load_train_test_data(train_data="data/raw/train.csv",test_data="data/raw/test.csv")
+        train_df,test_df=load_selected_data(train_data="data/selected/train.csv",test_data="data/selected/test.csv")
 
         train_df=clean_data(train_df)
         test_df=clean_data(test_df)
@@ -129,15 +116,22 @@ def main():
         X_train,y_train=split_features_target(train_df)
         X_test,y_test=split_features_target(test_df)
 
-        preprocessor=create_preprocesssor(X_train)
+        preprocessor=create_preprocessor(X_train)
 
-        X_train_processed,X_test_processed,preprocessor=preprocessor_data(X_train,X_test,preprocessor)
-
-        save_processed_data(X_train_processed,X_test_processed,y_train,y_test,data_path="data")
+        X_train_processed,X_test_processed=preprocess_data(X_train,X_test,preprocessor)
 
         logger.info("Data preprocessing completed successfully")
     except Exception as e:
-        logger.exception("Failed to complete data preprocessing")
+        logger.exception("Failed to complete data preprocessing: %s",e)
         raise
 if __name__=="__main__":
     main()
+
+
+
+
+
+
+
+
+
