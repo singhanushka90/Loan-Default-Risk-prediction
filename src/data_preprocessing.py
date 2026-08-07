@@ -7,6 +7,7 @@ from sklearn.preprocessing import OneHotEncoder,StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from config.features import TARGET_COLUMN
+import joblib
 
 log_dir='logs'
 os.makedirs(log_dir,exist_ok=True)
@@ -103,9 +104,22 @@ def preprocess_data(X_train,X_test,preprocessor):
         logger.exception("Error during Preprocessing: %s",e)
         raise
 
+
+def save_processed_data(X_train_processed,X_test_processed,y_train,y_test,preprocessor,data_path:str)->None:
+    try:
+        processed_data_path=os.path.join(data_path,'processed')
+        os.makedirs(processed_data_path,exist_ok=True)
+        joblib.dump(X_train_processed,os.path.join(processed_data_path,'X_train.pkl'))
+        joblib.dump(X_test_processed,os.path.join(processed_data_path,'X_test.pkl'))
+        joblib.dump(y_train,os.path.join(processed_data_path,'y_train.pkl'))
+        joblib.dump(y_test,os.path.join(processed_data_path,'y_test.pkl'))
+        joblib.dump(preprocessor,os.path.join(processed_data_path,'preprocessor.pkl'))
+        logger.info("Processed data saved successfully")
+    except Exception as e:
+        logger.exception("Error while saving processed data: %s",e)
+        raise
+
     
-
-
 def main():
     try:
         train_df,test_df=load_selected_data(train_data="data/selected/train.csv",test_data="data/selected/test.csv")
@@ -119,6 +133,8 @@ def main():
         preprocessor=create_preprocessor(X_train)
 
         X_train_processed,X_test_processed=preprocess_data(X_train,X_test,preprocessor)
+
+        save_processed_data(X_train_processed=X_train_processed,X_test_processed=X_test_processed,y_train=y_train,y_test=y_test,preprocessor=preprocessor,data_path="data")
 
         logger.info("Data preprocessing completed successfully")
     except Exception as e:
