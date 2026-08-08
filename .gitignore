@@ -1,4 +1,30 @@
-application_test.csv
-application_train.csv
+# Raw Kaggle dataset
+experiments/application_train.csv
+experiments/application_test.csv
+
+# DVC internal files
+.dvc/
+
+# Logs
+logs/
+
+# Generated data
+data/
+
+# Trained model artifacts
 models/
-config/
+data/model/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.venv/
+venv/
+
+# IDE
+.vscode/

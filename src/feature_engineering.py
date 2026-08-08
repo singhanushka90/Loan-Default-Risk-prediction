@@ -42,10 +42,9 @@ def load_train_test_data(train_data:str,test_data:str):
 
 def select_features(train:pd.DataFrame,test:pd.DataFrame):
     try:
-        train=train[SELECTED_FEATURES + TARGET_COLUMN]
-        test=test[SELECTED_FEATURES + TARGET_COLUMN]
-        logger.debug("Selected %d features successfully")
-        len(SELECTED_FEATURES)
+        train=train[SELECTED_FEATURES + [TARGET_COLUMN]]
+        test=test[SELECTED_FEATURES + [TARGET_COLUMN]]
+        logger.debug("Selected %d features successfully",len(SELECTED_FEATURES))
         return train , test
     except pd.errors.ParserError as e:
         logger.error("Error in parse data: %s",e)
