@@ -110,13 +110,16 @@ def save_model(best_model,data_path):
 
 def main():
     try:
-        params=load_params('params.yaml')
-        X_train,X_test,y_train,y_test,=load_processed_data(data_path="data")
-        model=build_model(params)
-        train_model(model,X_train,y_train)
-        best_model=hyperparameter_tuning(model,X_train,y_train,params)
-        save_model(best_model=best_model,data_path="data")
-        logger.info("Model training pipeline completed successfully")
+        mlflow.set_tracking_url("sqlite:///mlflow.db")
+        mlflow.set_experiment("Loan Default Prediction")
+        with mlflow.start_run(run_name="XGBoost_Tuning"):
+            params=load_params('params.yaml')
+            X_train,X_test,y_train,y_test,=load_processed_data(data_path="data")
+            model=build_model(params)
+            train_model(model,X_train,y_train)
+            best_model=hyperparameter_tuning(model,X_train,y_train,params)
+            save_model(best_model=best_model,data_path="data")
+            logger.info("Model training pipeline completed successfully")
     except Exception as e:
         logger.exception("Model training pipeline failed: %s",e)
         raise
