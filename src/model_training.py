@@ -4,6 +4,9 @@ import pandas as pd
 import joblib
 from xgboost import XGBClassifier
 from sklearn.model_selection import RandomizedSearchCV
+import mlflow
+import mlflow.xgboost
+import yaml 
 
 log_dir='logs'
 os.makedirs(log_dir,exist_ok=True)
@@ -26,6 +29,23 @@ if not logger.handlers:
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
+def load_params(params_path: str) -> dict:
+    """Load parameters from a YAML file."""
+    try:
+        with open(params_path, 'r') as file:
+            params = yaml.safe_load(file)
+        logger.debug('Parameters retrieved from %s', params_path)
+        return params
+    except FileNotFoundError:
+        logger.error('File not found: %s', params_path)
+        raise
+    except yaml.YAMLError as e:
+        logger.error('YAML error: %s', e)
+        raise
+    except Exception as e:
+        logger.error('Unexpected error: %s', e)
+        raise
+
 
 def load_processed_data(data_path:str):
     try:
@@ -46,9 +66,9 @@ def load_processed_data(data_path:str):
         raise
 
 
-def build_model():
+def build_model(params):
     try:
-        model=XGBClassifier(random_state=42,eval_metric='logloss',scale_pos_weight=11)
+        model=XGBClassifier(random_state=params["model"]["random_state"],eval_metric=params["model"]["eval_metric"],scale_pos_weight=params["model"]["scale_pos_weight"])
         logger.info("Model built successfully")
         return model
     except Exception as e:
@@ -64,18 +84,11 @@ def train_model(model,X_train,y_train):
         logger.error("Error occured during training model: %s",e)
         raise
 
-def hyperparameter_tuning(model,X_train,y_train):
+def hyperparameter_tuning(model,X_train,y_train,params):
     try:
-        params_dist={
-            "n_estimators":[100,200,300,500],
-            "max_depth":[3,5,7,9],
-            "learning_rate":[0.01,0.05,0.1,0.2],
-            "subsample":[0.6,0.8,1.0],
-            "colsample_bytree":[0.6,0.8,1.0],
-            "scale_pos_weight":[1,3,5,11],
-            "gamma":[0,0.1,0.3,0.5]
-        }
-        random_search=RandomizedSearchCV(estimator=model,param_distributions=params_dist,n_iter=20,cv=3,verbose=2,scoring="f1",random_state=42,n_jobs=-1,)
+        tuning_params=params["hyperparameter_tuning"]
+        params_dist=tuning_params["params"]
+        random_search=RandomizedSearchCV(estimator=model,param_distributions=params_dist,n_iter=tuning_params["n_iter"],cv=tuning_params["cv"],verbose=2,scoring=tuning_params["scoring"],random_state=tuning_params["random_state"],n_jobs=-1,)
         random_search.fit(X_train,y_train)
         logger.info("Best Parameters: %s",random_search.best_params_)
         logger.info("Best Score : %s",random_search.best_score_)
@@ -97,10 +110,11 @@ def save_model(best_model,data_path):
 
 def main():
     try:
+        params=load_params('params.yaml')
         X_train,X_test,y_train,y_test,=load_processed_data(data_path="data")
-        model=build_model()
+        model=build_model(params)
         train_model(model,X_train,y_train)
-        best_model=hyperparameter_tuning(model,X_train,y_train)
+        best_model=hyperparameter_tuning(model,X_train,y_train,params)
         save_model(best_model=best_model,data_path="data")
         logger.info("Model training pipeline completed successfully")
     except Exception as e:

@@ -2,6 +2,7 @@ import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
 import os
+import yaml
 
 
 log_dir="logs"
@@ -24,6 +25,24 @@ file_handler.setFormatter(formatter)
 if not logger.handlers:
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
+def load_params(params_path: str) -> dict:
+    """Load parameters from a YAML file."""
+    try:
+        with open(params_path, 'r') as file:
+            params = yaml.safe_load(file)
+        logger.debug('Parameters retrieved from %s', params_path)
+        return params
+    except FileNotFoundError:
+        logger.error('File not found: %s', params_path)
+        raise
+    except yaml.YAMLError as e:
+        logger.error('YAML error: %s', e)
+        raise
+    except Exception as e:
+        logger.error('Unexpected error: %s', e)
+        raise
+
 
 
 def load_data(data_url:str)->pd.DataFrame:
@@ -55,10 +74,11 @@ def save_train_test_data(train_data:pd.DataFrame,test_data:pd.DataFrame,data_pat
 
 def main():
     try:
-        test_size = 0.2
+        params=load_params("params.yaml")
+        test_size = params["data_ingestion"]["test_size"]
         data_path='experiments/application_train.csv'
         df=load_data(data_url=data_path)
-        train_data,test_data=train_test_split(df,test_size=test_size,random_state=42,stratify=df["TARGET"])
+        train_data,test_data=train_test_split(df,test_size=test_size,random_state=params["data_ingestion"]["random_state"],stratify=df["TARGET"])
         save_train_test_data(train_data,test_data,data_path='./data')
     except Exception as e:
         logger.exception('Failed to complete the data ingestion process')
