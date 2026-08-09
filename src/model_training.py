@@ -114,6 +114,14 @@ def main():
         mlflow.set_experiment("Loan Default Prediction")
         with mlflow.start_run(run_name="XGBoost_Tuning"):
             params=load_params('params.yaml')
+            mlflow.log_params({
+                "random_state": params["model"]["random_state"],
+                "eval_metric": params["model"]["eval_metric"],
+                "scale_pos_weight": params["model"]["scale_pos_weight"],
+                "n_iter": params["hyperparameter_tuning"]["n_iter"],
+                "cv":params["hyperparameter_tuning"]["cv"],
+                "scoring":params["hyperparameter_tuning"]["scoring"]
+            })
             X_train,X_test,y_train,y_test,=load_processed_data(data_path="data")
             model=build_model(params)
             train_model(model,X_train,y_train)
