@@ -38,8 +38,12 @@ stages:
     cmd: python src/model_training.py
     deps:
       - src/model_training.py
+      - params.yaml
       - data/processed/X_train.pkl
       - data/processed/y_train.pkl
+    params:
+      - model 
+      - hyperparameter_tuning
     outs:
       - data/model/best_model.pkl
 
@@ -50,7 +54,8 @@ stages:
       - data/model/best_model.pkl
       - data/processed/X_test.pkl
       - data/processed/y_test.pkl
-    outs:
+    metrics:
       - data/metrics/metrics.json
+    outs:
       - data/plots/roc_curve.png
       - data/plots/precision_recall_curve.png

@@ -154,6 +154,11 @@ def main():
             mlflow.log_artifact(pr_path,artifact_path="plots")
             logger.info("Evaluation plots logger to MlFlow successfully")
             save_metrics(metrics=metrics,data_path="data")
+            metrics_file=os.path.join(
+                "data","metrics","metrics.json"
+            )
+            mlflow.log_artifact(metrics_file,artifact_path="metrics")
+            logger.info("Metrics JSON logged to MlFlow successfully")
             logger.info("Model evaluation pipeline completed successfuly")
     except Exception as e:
         logger.exception("Model evaluation pipeline failed: %s",e)

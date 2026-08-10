@@ -126,6 +126,8 @@ def main():
             model=build_model(params)
             train_model(model,X_train,y_train)
             best_model=hyperparameter_tuning(model,X_train,y_train,params)
+            mlflow.sklearn.log_model(best_model,artifact_path="model")
+            logger.info("Best model logged")
             save_model(best_model=best_model,data_path="data")
             logger.info("Model training pipeline completed successfully")
     except Exception as e:
