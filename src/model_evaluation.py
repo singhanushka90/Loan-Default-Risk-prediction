@@ -6,7 +6,8 @@ from sklearn.metrics import  accuracy_score,f1_score,roc_auc_score,precision_sco
 import matplotlib.pyplot as plt 
 import joblib
 import json
-     
+import mlflow
+
 log_dir="logs"
 os.makedirs(log_dir,exist_ok=True)
 
@@ -60,6 +61,8 @@ def evaluate_model(model,X_test,y_test):
             "roc_auc" : roc_auc,
             "average_precision" : average_precision
         }
+        mlflow.log_metrics(metrics)
+        logger.info("Evaluation metrics logger to MLFlow successfully")
         logger.info("Model evaluation completed successfully")
         logger.info("Accuracy : %.4f",accuracy)
         logger.info("Precision : %.4f",precision)
@@ -137,15 +140,20 @@ def save_metrics(metrics:dict,data_path:str):
 
 def main():
     try:
-        model=load_model(data_path="data")
-        X_test=joblib.load(os.path.join("data","processed","X_test.pkl"))
-        y_test=joblib.load(os.path.join("data","processed","y_test.pkl"))
-        logger.info("Test data loaded successfully")
-        metrics=evaluate_model(model=model,X_test=X_test,y_test=y_test)
-        plot_roc_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
-        plot_precision_recall_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
-        save_metrics(metrics=metrics,data_path="data")
-        logger.info("Model evaluation pipeline completed successfuly")
+        mlflow.set_tracking_uri("sqlite:///mlflow.db")
+        mlflow.set_experiment("Loan Default Prediction")
+        with mlflow.start_run(run_name="Model_Evaluation"):
+            model=load_model(data_path="data")
+            X_test=joblib.load(os.path.join("data","processed","X_test.pkl"))
+            y_test=joblib.load(os.path.join("data","processed","y_test.pkl"))
+            logger.info("Test data loaded successfully")
+            metrics=evaluate_model(model=model,X_test=X_test,y_test=y_test)
+            mlflow.log_metrics(metrics)
+            logger.info("Evaluation metrics logger to MLFlow successfully")
+            plot_roc_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
+            plot_precision_recall_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
+            save_metrics(metrics=metrics,data_path="data")
+            logger.info("Model evaluation pipeline completed successfuly")
     except Exception as e:
         logger.exception("Model evaluation pipeline failed: %s",e)
         raise

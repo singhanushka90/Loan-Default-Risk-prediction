@@ -110,7 +110,7 @@ def save_model(best_model,data_path):
 
 def main():
     try:
-        mlflow.set_tracking_url("sqlite:///mlflow.db")
+        mlflow.set_tracking_uri("sqlite:///mlflow.db")
         mlflow.set_experiment("Loan Default Prediction")
         with mlflow.start_run(run_name="XGBoost_Tuning"):
             params=load_params('params.yaml')
