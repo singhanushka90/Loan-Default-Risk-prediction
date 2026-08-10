@@ -36,7 +36,7 @@ def load_model(data_path:str):
         model=joblib.load(os.path.join(model_path,'best_model.pkl'))
         logger.info("Model loaded successfully")
         return model
-    except Exception as e:
+    except FileNotFoundError as e:
         logger.error("Model file not found: %s",e)
         raise
     except Exception as e:
@@ -61,8 +61,6 @@ def evaluate_model(model,X_test,y_test):
             "roc_auc" : roc_auc,
             "average_precision" : average_precision
         }
-        mlflow.log_metrics(metrics)
-        logger.info("Evaluation metrics logger to MLFlow successfully")
         logger.info("Model evaluation completed successfully")
         logger.info("Accuracy : %.4f",accuracy)
         logger.info("Precision : %.4f",precision)
@@ -90,12 +88,12 @@ def plot_roc_curve(model,X_test,y_test,data_path:str):
         plt.grid()
         plot_path=os.path.join(data_path,'plots')
         os.makedirs(plot_path,exist_ok=True)
-        plt.savefig(os.path.join(plot_path,"roc_curve.png"),dpi=300,bbox_inches='tight')
-        plt.show()
+        roc_path=os.path.join(plot_path,"roc_curve.png")
+        plt.savefig(roc_path,dpi=300,bbox_inches='tight')
         plt.close()
         logger.info("ROC curve saved successfully")
         logger.info("ROC-AUC Score: %.4f",auc_score)
-        return auc_score
+        return roc_path
     except Exception as e:
         logger.exception("Error while plotting ROC Curve: %s",e)
         raise
@@ -115,12 +113,12 @@ def plot_precision_recall_curve(model,X_test,y_test,data_path:str):
         plt.grid()
         plot_path=os.path.join(data_path,'plots')
         os.makedirs(plot_path,exist_ok=True)
-        plt.savefig(os.path.join(plot_path,"Precision_Recall_Curve.png"),dpi=300,bbox_inches='tight')
-        plt.show()
+        pr_path=os.path.join(plot_path,"precision_recall_curve.png")
+        plt.savefig(pr_path,dpi=300,bbox_inches='tight')
         plt.close()
         logger.info("Precision Recall curve saved successfully")
         logger.info("Average Precision: %.4f",ap_score)
-        return ap_score
+        return pr_path
     except Exception as e:
         logger.exception("Error while plotting Precision Recall Curve: %s",e)
         raise
@@ -150,8 +148,11 @@ def main():
             metrics=evaluate_model(model=model,X_test=X_test,y_test=y_test)
             mlflow.log_metrics(metrics)
             logger.info("Evaluation metrics logger to MLFlow successfully")
-            plot_roc_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
-            plot_precision_recall_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
+            roc_path=plot_roc_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
+            pr_path=plot_precision_recall_curve(model=model,X_test=X_test,y_test=y_test,data_path="data")
+            mlflow.log_artifact(roc_path,artifact_path="plots")
+            mlflow.log_artifact(pr_path,artifact_path="plots")
+            logger.info("Evaluation plots logger to MlFlow successfully")
             save_metrics(metrics=metrics,data_path="data")
             logger.info("Model evaluation pipeline completed successfuly")
     except Exception as e:
