@@ -101,8 +101,8 @@ stages:
       size: 3936915
     - path: params.yaml
       hash: md5
-      md5: 6685fcea669969300451a2cd1cd92e8e
-      size: 460
+      md5: d65a1f82adab9b394badafe451625ce9
+      size: 464
     - path: src/model_training.py
       hash: md5
       md5: 9e0727e6e839c7ccf455916bd549d67b
@@ -121,8 +121,8 @@ stages:
             - 300
             - 500
             max_depth:
+            - 3
             - 5
-            - 7
             - 9
             learning_rate:
             - 0.01
@@ -131,6 +131,7 @@ stages:
             subsample:
             - 0.6
             - 0.8
+            - 1.0
             colsample_bytree:
             - 0.6
             - 0.8
@@ -152,15 +153,15 @@ stages:
     outs:
     - path: data/model/best_model.pkl
       hash: md5
-      md5: 6a62ed1a05010649097314b7f815759a
-      size: 771129
+      md5: 24b831ca111c1f5638eeaef38e8199b8
+      size: 351562
   model_evaluation:
     cmd: python src/model_evaluation.py
     deps:
     - path: data/model/best_model.pkl
       hash: md5
-      md5: 6a62ed1a05010649097314b7f815759a
-      size: 771129
+      md5: 24b831ca111c1f5638eeaef38e8199b8
+      size: 351562
     - path: data/processed/X_test.pkl
       hash: md5
       md5: 3c921f4d786f9d2b96fab014dce80129
@@ -176,13 +177,13 @@ stages:
     outs:
     - path: data/metrics/metrics.json
       hash: md5
-      md5: 0a7361bcea3911502575ee0d48963c45
+      md5: fcfc394b2355b28a733c9e182bee85f9
       size: 234
     - path: data/plots/precision_recall_curve.png
       hash: md5
-      md5: 5f0baa7078a3e831a93f1bea99205776
-      size: 89456
+      md5: 3f969a097961ad5d40fb62e8d795ee52
+      size: 90508
     - path: data/plots/roc_curve.png
       hash: md5
-      md5: d13da7e8fb7c82dc0484e52d57bdbbbe
-      size: 128975
+      md5: 1fbdedf40c325e8c826525335141d8d4
+      size: 129928

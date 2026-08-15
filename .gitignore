@@ -30,3 +30,5 @@ venv/
 .vscode/
 mlruns/
 mlflow.db
+practice.ipynb
+test.py/
