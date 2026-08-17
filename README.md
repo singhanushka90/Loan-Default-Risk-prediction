@@ -1,74 +1,47 @@
-# Loan Default Prediction - End-to-End MLOps Project
+# Loan Default Prediction API
 
-An end-to-end Machine Learning and MLOps project for predicting the probability of loan default using the Home Credit dataset.
+A Machine Learning based FastAPI application that predicts the probability of loan default.
 
-The project covers the complete ML workflow from data ingestion and preprocessing to model training, evaluation, experiment tracking, data versioning, and the initial FastAPI backend setup.
+## Current Features
 
----
+- Loan default prediction using XGBoost
+- Data preprocessing pipeline
+- Selected important features
+- Model saved using Joblib
+- FastAPI REST API
+- Swagger API documentation
+- OAuth2 password authentication
+- JWT-based login/authentication
+- Protected user profile
+- Prediction probability returned by API
+- Custom prediction threshold: **0.46**
+- Model evaluation with Accuracy, Precision, Recall, F1, ROC-AUC and Average Precision
+- MLflow experiment tracking
+- ROC and Precision-Recall curves
+- MongoDB database connected
+- Users collection created
+- Predictions collection created
 
-## 🚀 Project Overview
+## Model Performance
 
-Loan default prediction is a classification problem where the goal is to identify customers who are likely to default on a loan.
+- Accuracy: ~86.6%
+- Precision: ~24.4%
+- Recall: ~43.0%
+- F1 Score: ~0.31
+- ROC-AUC: ~0.76
+- Best Threshold: **0.46**
 
-The dataset is highly imbalanced, so the project does not rely only on accuracy. Multiple evaluation metrics such as Precision, Recall, F1-score, ROC-AUC and Average Precision are used.
+## Tech Stack
 
-The project is designed with an MLOps-oriented architecture using:
+Python • FastAPI • XGBoost • Scikit-learn • MongoDB • JWT • OAuth2 • MLflow • Joblib
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- XGBoost
-- DVC
-- MLflow
-- FastAPI
-- MongoDB
-- JWT Authentication
-- Docker (planned)
-- GitHub Actions CI/CD (planned)
+## Upcoming
 
----
-
-# 📁 Project Structure
-
-```text
-Loan-Detection/
-│
-├── app/
-│   ├── config.py
-│   ├── database.py
-│   ├── main.py
-│   ├── router.py
-│   ├── schemas.py
-│   └── services.py
-│
-├── data/
-│   ├── raw/
-│   ├── selected/
-│   ├── processed/
-│   ├── model/
-│   ├── metrics/
-│   └── plots/
-│
-├── experiments/
-│
-├── logs/
-│
-├── mlruns/
-│
-├── src/
-│   ├── data_ingestion.py
-│   ├── feature_engineering.py
-│   ├── data_preprocessing.py
-│   ├── model_training.py
-│   └── model_evaluation.py
-│
-├── .dvc/
-├── .dvcignore
-├── .gitignore
-├── dvc.yaml
-├── dvc.lock
-├── params.yaml
-├── mlflow.db
-├── requirements.txt
-└── README.md
+- Save predictions in MongoDB
+- Prediction history API
+- User-specific prediction history
+- Delete prediction/history
+- Complete API authentication & authorization
+- Testing
+- Dockerization
+- Final deployment
